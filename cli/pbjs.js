@@ -1,15 +1,14 @@
 "use strict";
 var path     = require("path"),
     fs       = require("fs"),
-    pkg      = require("./package.json"),
-    util     = require("./util");
-
-util.setup();
-
-var protobuf = require(util.pathToProtobufJs),
     minimist = require("minimist"),
     chalk    = require("chalk"),
-    glob     = require("glob");
+    glob     = require("glob"),
+    pkg      = require("./package.json"),
+    util     = require("./util"),
+    requireProtobufjs = require("./require-protobufjs");
+
+var protobuf = requireProtobufjs();
 
 var targets  = util.requireAll("./targets");
 
@@ -44,7 +43,7 @@ exports.main = function main(args, callback) {
             "force-message": "strict-message"
         },
         string: [ "target", "out", "path", "wrap", "dependency", "root", "lint" ],
-        boolean: [ "create", "encode", "decode", "verify", "convert", "delimited", "beautify", "comments", "es6", "sparse", "keep-case", "force-long", "force-number", "force-enum-string", "force-message" ],
+        boolean: [ "create", "encode", "decode", "verify", "convert", "delimited", "typeurl", "beautify", "comments", "es6", "sparse", "keep-case", "force-long", "force-number", "force-enum-string", "force-message", "bundle" ],
         default: {
             target: "json",
             create: true,
@@ -53,8 +52,10 @@ exports.main = function main(args, callback) {
             verify: true,
             convert: true,
             delimited: true,
+            typeurl: true,
             beautify: true,
             comments: true,
+            bundle: true,
             es6: null,
             lint: lintDefault,
             "keep-case": false,
@@ -99,7 +100,7 @@ exports.main = function main(args, callback) {
                 "",
                 "  -o, --out        Saves to a file instead of writing to stdout.",
                 "",
-                "  --sparse         Exports only those types referenced from a main file (experimental).",
+                "  --sparse         Exports only those types referenced from a main file (experimental). Ignored with --no-bundle.",
                 "",
                 chalk.bold.gray("  Module targets only:"),
                 "",
@@ -133,14 +134,16 @@ exports.main = function main(args, callback) {
                 "  --no-verify      Does not generate verify functions.",
                 "  --no-convert     Does not generate convert functions like from/toObject",
                 "  --no-delimited   Does not generate delimited encode/decode functions.",
+                "  --no-typeurl     Does not generate getTypeUrl function.",
                 "  --no-beautify    Does not beautify generated code.",
                 "  --no-comments    Does not output any JSDoc comments.",
+                "  --no-bundle      Does not bundle imported protos. Only accepts one input file with this option.",
                 "",
-                "  --force-long     Enfores the use of 'Long' for s-/u-/int64 and s-/fixed64 fields.",
-                "  --force-number   Enfores the use of 'number' for s-/u-/int64 and s-/fixed64 fields.",
-                "  --force-message  Enfores the use of message instances instead of plain objects.",
+                "  --force-long     Enforces the use of 'Long' for s-/u-/int64 and s-/fixed64 fields.",
+                "  --force-number   Enforces the use of 'number' for s-/u-/int64 and s-/fixed64 fields.",
+                "  --force-message  Enforces the use of message instances instead of plain objects.",
                 "",
-                "usage: " + chalk.bold.green("pbjs") + " [options] file1.proto file2.json ..." + chalk.gray("  (or pipe)  ") + "other | " + chalk.bold.green("pbjs") + " [options] -",
+                "usage: " + chalk.bold.green("pbjs") + " [options] file1.proto file2.json ..." + chalk.gray("  (or pipe)  ") + "other | " + chalk.bold.green("pbjs") + " [options] - | " + chalk.bold.green("pbjs") + " --no-bundle [options] file.proto",
                 ""
             ].join("\n"));
         return 1;
@@ -231,9 +234,12 @@ exports.main = function main(args, callback) {
 
     // Load from disk
     } else {
+        if (!argv.bundle && files.length !== 1) {
+            throw Error("Only one file may be specified with --no-bundle.");
+        }
         try {
             root.loadSync(files, parseOptions).resolveAll(); // sync is deterministic while async is not
-            if (argv.sparse)
+            if (argv.sparse && argv.bundle)
                 sparsify(root);
             callTarget();
         } catch (err) {
@@ -326,3 +332,4 @@ exports.main = function main(args, callback) {
 
     return undefined;
 };
+
