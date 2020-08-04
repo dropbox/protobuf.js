@@ -5,6 +5,6 @@ module.exports = function requireProtobufjs() {
         // for local development, i.e. forked from github
         return require("..");
     } catch (e) {
-        return require("protobufjs");
+        return require("@dropbox-web-platform/protobufjs");
     }
 };

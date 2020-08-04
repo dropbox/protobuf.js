@@ -1,6 +1,6 @@
 {
-  "name": "protobufjs",
-  "version": "7.0.0",
+  "name": "@dropbox-web-platform/protobufjs",
+  "version": "1.0.8",
   "versionScheme": "~",
   "description": "Protocol Buffers for JavaScript (& TypeScript).",
   "author": "Daniel Wirtz <dcode+protobufjs@dcode.io>",

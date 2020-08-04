@@ -1,7 +1,7 @@
 {
-  "name": "protobufjs-cli",
+  "name": "@dropbox-web-platform/protobufjs-cli",
   "description": "Translates between file formats and generates static code as well as TypeScript definitions.",
-  "version": "7.0.0",
+  "version": "1.0.8",
   "author": "Daniel Wirtz <dcode+protobufjs@dcode.io>",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "prepublish": "node scripts/prepublish"
   },
   "peerDependencies": {
-    "protobufjs": "~6.9.0"
+    "@dropbox-web-platform/protobufjs": "^1.0.8"
   },
   "dependencies": {
     "chalk": "^4.0.0",
